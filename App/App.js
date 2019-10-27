@@ -1,23 +1,26 @@
 import React from 'react';
-import {Text} from 'react-native';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
-import {Login, Home} from './screens';
+import {TaskList, Home, TaskEdit} from './screens';
 import {navService} from './core';
+import {YellowBox} from 'react-native';
 
+YellowBox.ignoreWarnings(['Setting a timer']);
 const MainNavigator = createStackNavigator({
-  Login: {screen: Login},
-  Home: {screen: Home},
+  TasksView: {screen: TaskList},
+  TasksEdit: {screen: TaskEdit},
 });
 
 const AppContainer = createAppContainer(MainNavigator);
 
 export default function App() {
   return (
-    <AppContainer
-      ref={navigatorRef => {
-        navService.setTopLevelNavigator(navigatorRef);
-      }}
-    />
+    <Home>
+      <AppContainer
+        ref={navigatorRef => {
+          navService.setTopLevelNavigator(navigatorRef);
+        }}
+      />
+    </Home>
   );
 }

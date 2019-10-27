@@ -1,35 +1,43 @@
 import React, {Component} from 'react';
-import {View, TextInput, Button, StyleSheet} from 'react-native';
+import {View, Text} from 'react-native';
 import {navService} from '../core';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import {Input} from 'react-native-elements';
+import Form from './Form';
+import styles from './styles';
+import {login} from '../core';
 
 export class Login extends Component {
   static navigationOptions = {
     header: null,
   };
+  state = {email: '', password: ''};
+
+  handleLogin = () => {
+    const {email, password} = this.state;
+    // login(email, password)
+    //   .then(() => {
+    navService.navigate('Home', {user: email});
+    // })
+    // .catch(err => alert(err));
+  };
+
+  updateEmail = email => {
+    this.setState({email});
+  };
+
+  updatePassword = password => {
+    this.setState({password});
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <Input placeholder="Email" />
-        <Button title="Login" onPress={() => navService.navigate('Home')} />
+        <Text style={styles.title}>Login</Text>
+        <Form
+          onLogin={this.handleLogin}
+          onEmailUpdate={this.updateEmail}
+          onPasswordUpdate={this.updatePassword}
+        />
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    width: 300,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    margin: 20,
-  },
-});
