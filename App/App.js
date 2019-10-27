@@ -1,12 +1,24 @@
 import React from 'react';
-import {Text, StyleSheet} from 'react-native';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import {TaskList, Home, TaskEdit} from './screens';
+import {navService} from './core';
+
+const MainNavigator = createStackNavigator({
+  TasksView: {screen: TaskList},
+  TasksEdit: {screen: TaskEdit},
+});
+
+const AppContainer = createAppContainer(MainNavigator);
 
 export default function App() {
-  return <Text style={styles.middle}>Hello, World!</Text>;
+  return (
+    <Home>
+      <AppContainer
+        ref={navigatorRef => {
+          navService.setTopLevelNavigator(navigatorRef);
+        }}
+      />
+    </Home>
+  );
 }
-
-const styles = StyleSheet.create({
-  middle: {
-    textAlign: 'center',
-  },
-});
