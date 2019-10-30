@@ -1,3 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="description_width">120dp</dimen>
+    <dimen name="title_width">50dp</dimen>
+    <dimen name="deadline_width">20dp</dimen>
+    <dimen name="header_margin">15dp</dimen>
 </resources>
