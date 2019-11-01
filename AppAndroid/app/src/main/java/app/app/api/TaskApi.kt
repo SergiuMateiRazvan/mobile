@@ -1,26 +1,26 @@
-package app.app.API
+package app.app.api
 
-import app.app.Model.Task
+import app.app.model.Task
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 data class TaskList(val tasks: List<Task>){}
 
 object TaskApi {
-    private const val URL = "http://192.168.0.100:3000/"
+    private const val URL = "http://172.30.117.156:3000/"
 
     interface Service {
         @GET("/tasks")
         suspend fun find() : List<Task>
 
+        @GET("/tasks/{id}")
+        suspend fun read(@Path("id") taskID: String) : Task
+
         @Headers("Content-Type: application/json")
-        @POST("/tasks")
+        @POST("/tasks/task")
         suspend fun create(@Body item: Task): Task
     }
 

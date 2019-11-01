@@ -1,11 +1,11 @@
-package app.app.ViewModels
+package app.app.viewModels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.app.Model.Task
-import app.app.Repository.TaskRespository
+import app.app.model.Task
+import app.app.repository.TaskRepository
 import kotlinx.coroutines.launch
 
 class TaskListViewModel : ViewModel() {
@@ -23,7 +23,7 @@ class TaskListViewModel : ViewModel() {
             mutableLoading.value = true
             mutableException.value = null
             try{
-                mutableTasks.value = TaskRespository.loadAll()
+                mutableTasks.value = TaskRepository.loadAll()
                 mutableLoading.value = false
             }catch (e: Exception) {
                 mutableException.value = e

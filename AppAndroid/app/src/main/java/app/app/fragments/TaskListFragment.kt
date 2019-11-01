@@ -1,5 +1,4 @@
-package app.app.Fragments
-import android.util.Log
+package app.app.fragments
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,10 +8,10 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import app.app.Model.Task
+import app.app.model.Task
 import app.app.R
-import app.app.ViewModels.TaskListAdapter
-import app.app.ViewModels.TaskListViewModel
+import app.app.viewModels.TaskListAdapter
+import app.app.viewModels.TaskListViewModel
 import kotlinx.android.synthetic.main.task_list_fragment.*
 
 

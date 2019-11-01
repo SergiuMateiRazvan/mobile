@@ -1,12 +1,15 @@
-package app.app.ViewModels
+package app.app.viewModels
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import app.app.Model.Task
+import app.app.fragments.TaskEditFragment
+import app.app.model.Task
 import app.app.R
 import kotlinx.android.synthetic.main.task_view.view.*
 
@@ -20,17 +23,16 @@ class TaskListAdapter(
             notifyDataSetChanged()
         }
 
-//    private var onTaskClick: View.OnClickListener
-//
-//    init {
-//        onItemClick = View.OnClickListener { view ->
-//            val item = view.tag as Task
-//            fragment.findNavController().navigate(R.id.task_edit_fragment, Bundle().apply {
-//                putString(TaskEditFragment.ITEM_ID, item.id)
-//            })
-//
-//        }
-//    }
+    private var onTaskClick: View.OnClickListener
+
+    init {
+        onTaskClick = View.OnClickListener { view ->
+            val task = view.tag as Task
+            fragment.findNavController().navigate(R.id.task_edit_fragment, Bundle().apply {
+                putString(TaskEditFragment.TASK_ID, task.ID)
+            })
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -44,10 +46,10 @@ class TaskListAdapter(
         val task = tasks[position]
         holder.title.text = task.Title
         holder.description.text = task.Description
-        holder.deadline.text = task.Deadline
+        holder.deadline.text = task.Deadline.toString()
         holder.status.text = task.Status
         holder.itemView.tag = task
-//        holder.itemView.setOnClickListener(onItemClick)
+        holder.itemView.setOnClickListener(onTaskClick)
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
