@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.TaskEditFragment">
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/buttonFieldsLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/label_margin"
+            android:layout_marginStart="@dimen/label_margin"
+            android:text="@string/titleLabel"/>
+        <EditText
+            android:id="@+id/task_title"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height"
+            android:layout_gravity="top"
+            android:layout_margin="@dimen/input_margin"
+            android:gravity="top"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/label_margin"
+            android:layout_marginStart="@dimen/label_margin"
+            android:text="@string/descriptionLabel"/>
+        <EditText
+            android:id="@+id/task_description"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height"
+            android:layout_gravity="top"
+            android:layout_margin="@dimen/input_margin"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/label_margin"
+            android:layout_marginStart="@dimen/label_margin"
+            android:text="@string/deadlineLabel"/>
+        <EditText
+            android:id="@+id/task_deadline"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height"
+            android:layout_margin="@dimen/input_margin"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/label_margin"
+            android:layout_marginStart="@dimen/label_margin"
+            android:text="@string/statusLabel"/>
+
+        <Spinner
+            android:id="@+id/task_status"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height"
+            android:entries="@array/status_array"
+            />
+<!--        <EditText-->
+<!--            android:id="@+id/task_status"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="@dimen/input_height"-->
+<!--            android:layout_margin="@dimen/input_margin"-->
+<!--            android:inputType="text" />-->
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
+</FrameLayout>

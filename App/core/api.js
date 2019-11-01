@@ -1,4 +1,4 @@
-export const apiUrl = 'http://192.168.0.102:3000/tasks';
+export const apiUrl = 'http://172.30.117.156:3000/tasks';
 
 export function getTasks() {
   return fetch(`${apiUrl}`);

@@ -41,10 +41,22 @@ srv.get("/tasks", (req, res) => {
   });
 });
 
+srv.get("/tasks/:id", (req, res) => {
+  const conn = getConnection();
+
+  const queryString = "SELECT * FROM tasks WHERE ID=?";
+  conn.query(queryString, [req.params.id], (err, rows, _) => {
+    if (err) {
+      throw new Error(err);
+    }
+    res.json(rows);
+    conn.destroy();
+  });
+});
+
 srv.post("/tasks/task", (req, res) => {
   const task = req.body;
   del(task);
-
   const queryString =
     "INSERT INTO tasks(Title, Description, Deadline, Status) VALUES (?,?,?,?)";
   const conn = getConnection();
@@ -56,7 +68,7 @@ srv.post("/tasks/task", (req, res) => {
         throw new Error(err);
       }
       task.ID = rows.insertId;
-      res.end();
+      res.json(task);
       broadcast(task);
       conn.destroy();
     }
