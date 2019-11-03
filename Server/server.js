@@ -1,4 +1,5 @@
 require("ws");
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const srv = express();
 const morgan = require("morgan");
@@ -26,10 +27,35 @@ const broadcast = data => {
   });
 };
 
-srv.get("/tasks", (req, res) => {
+srv.post("/login", (req, res) => {
   const conn = getConnection();
 
-  conn.query("SELECT * FROM tasks", (err, rows, fields) => {
+  queryString = "SELECT * FROM users WHERE Email=?";
+
+  conn.query(queryString, [req.body.username], (err, rows, _) => {
+    if (err) {
+      console.log("Failed to login");
+      res.sendStatus(500);
+      res.end();
+      return;
+    }
+    if (rows[0].Parola === req.body.password) {
+      const token = jwt.sign({ _id: rows.Id, email: rows.Email }, "mysecret");
+      res
+        .header("Authorization", token)
+        .status(200)
+        .json({ token: token });
+    } else {
+      res.status(404);
+      res.send("Invalid credentials");
+    }
+  });
+});
+
+srv.get("/tasks", verifyToken, (req, res) => {
+  const conn = getConnection();
+
+  conn.query("SELECT * FROM tasks", (err, rows, _) => {
     if (err) {
       console.log("Failed to get tasks");
       res.sendStatus(500);
@@ -41,9 +67,8 @@ srv.get("/tasks", (req, res) => {
   });
 });
 
-srv.get("/tasks/:id", (req, res) => {
+srv.get("/tasks/:id", verifyToken, (req, res) => {
   const conn = getConnection();
-
   const queryString = "SELECT * FROM tasks WHERE ID=?";
   conn.query(queryString, [req.params.id], (err, rows, _) => {
     if (err) {
@@ -54,7 +79,7 @@ srv.get("/tasks/:id", (req, res) => {
   });
 });
 
-srv.post("/tasks/task", (req, res) => {
+srv.post("/tasks/task", verifyToken, (req, res) => {
   const task = req.body;
   del(task);
   const queryString =
@@ -98,4 +123,16 @@ function del(task) {
     }
     conn.destroy();
   });
+}
+
+function verifyToken(req, res, next) {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) return res.status(401).send("Access Denied");
+    const verified = jwt.verify(token, "mysecret");
+    req.userData = verified;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Authentication failed" });
+  }
 }
