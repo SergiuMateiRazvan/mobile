@@ -1,23 +1,29 @@
 package app.app.auth.data
 
+import app.app.auth.data.local.TokenDao
 import app.app.auth.data.remote.RemoteAuthDataSource
 import app.app.core.*
 
 
-object AuthRepository {
+class AuthRepository(private val tokenDao: TokenDao) {
     var user: User? = null
         private set
 
     val isLoggedIn: Boolean
-        get() = user != null
+        get() = tokenDao.count() != 0
 
     init {
         user = null
+        if(isLoggedIn) {
+            val data = tokenDao.get()
+            Api.tokenInterceptor.token = data[0].token
+        }
     }
 
     fun logout() {
         user = null
         Api.tokenInterceptor.token = null
+        tokenDao.delete()
     }
 
     suspend fun login(username: String, password: String): Result<TokenHolder> {
@@ -29,9 +35,10 @@ object AuthRepository {
         return result
     }
 
-    private fun setLoggedInUser(user: User, tokenHolder: TokenHolder) {
+    private suspend fun setLoggedInUser(user: User, tokenHolder: TokenHolder) {
         this.user = user
         Api.tokenInterceptor.token = tokenHolder.token
+        tokenDao.insert(tokenHolder)
     }
 }
 

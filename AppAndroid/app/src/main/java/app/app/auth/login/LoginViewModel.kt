@@ -1,26 +1,32 @@
 package app.app.auth.login
 
+import android.app.Application
 import android.util.Patterns
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import app.app.R
 import app.app.auth.data.AuthRepository
 import app.app.auth.data.TokenHolder
+import app.app.auth.data.local.TokenDatabase
 import kotlinx.coroutines.launch
 import app.app.core.*
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val mutableLoginFormState = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> = mutableLoginFormState
 
     private val mutableLoginResult = MutableLiveData<Result<TokenHolder>>()
     val loginResult: LiveData<Result<TokenHolder>> = mutableLoginResult
 
+    val authRepo: AuthRepository
+
+    init{
+        val tokenDao = TokenDatabase.getDatabase(application).tokenDao()
+        authRepo = AuthRepository(tokenDao)
+    }
+
     fun login(username: String, password: String) {
         viewModelScope.launch{
-            mutableLoginResult.value = AuthRepository.login(username, password)
+            mutableLoginResult.value = authRepo.login(username, password)
         }
     }
 
@@ -42,7 +48,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun isPasswordValid(password: String): Boolean {
-        return password.length > 0
+        return password.isNotEmpty()
     }
 
 

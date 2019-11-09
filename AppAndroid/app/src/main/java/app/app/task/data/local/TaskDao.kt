@@ -13,10 +13,10 @@ interface TaskDao {
     fun getById(id: String): LiveData<Task>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: Task)
+    suspend fun insert(task: Task)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun update(item: Task)
+    suspend fun update(task: Task)
 
     @Query("DELETE FROM tasks")
     suspend fun deleteAll()

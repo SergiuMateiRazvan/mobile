@@ -1,3 +1,8 @@
 package app.app.auth.data
 
-data class TokenHolder(val token: String)
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "token")
+data class TokenHolder(@PrimaryKey @ColumnInfo(name="token") val token: String)
