@@ -1,24 +1,28 @@
 import React from 'react';
-import {createAppContainer} from 'react-navigation';
-import {createStackNavigator} from 'react-navigation-stack';
-import {TaskList, Home, TaskEdit} from './screens';
+import {createAppContainer, createSwitchNavigator} from 'react-navigation';
+import {Tasks, Home} from './screens';
 import {navService} from './core';
+import {AuthLoading, AuthStore, Auth} from './auth';
 
-const MainNavigator = createStackNavigator({
-  TasksView: {screen: TaskList},
-  TasksEdit: {screen: TaskEdit},
-});
+const AppContainer = createAppContainer(
+  createSwitchNavigator(
+    {AuthLoading, Tasks, Auth},
+    {initialRouteName: 'AuthLoading'},
+  ),
+);
 
-const AppContainer = createAppContainer(MainNavigator);
-
-export default function App() {
+const App = () => {
   return (
-    <Home>
-      <AppContainer
-        ref={navigatorRef => {
-          navService.setTopLevelNavigator(navigatorRef);
-        }}
-      />
-    </Home>
+    <AuthStore>
+      <Home>
+        <AppContainer
+          ref={navigatorRef => {
+            navService.setTopLevelNavigator(navigatorRef);
+          }}
+        />
+      </Home>
+    </AuthStore>
   );
-}
+};
+
+export default App;

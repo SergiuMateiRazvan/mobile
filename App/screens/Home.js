@@ -1,74 +1,116 @@
-import React, {Component} from 'react';
-import {getTasks, putTask, apiUrl, getLogger} from '../core';
+import React, {useState, useEffect, useContext, useCallback} from 'react';
+import {getTasks, putTask, getLogger} from '../core';
 import {Provider} from './context';
+import {AuthContext} from '../auth/context';
+import {AsyncStorage} from 'react-native';
 
 const log = getLogger('Home');
 
-export class Home extends Component {
-  state = {
-    tasks: [],
-    error: null,
-    isLoading: true,
-    onSubmit: this.handleAdd,
-  };
-  constructor(props) {
-    super(props);
-  }
-  ws = new WebSocket(`${apiUrl}`);
+const IDS_KEY = 'IDSKEY';
 
-  componentDidMount() {
-    this.connectWebSocket();
-    this.loadTasks();
-    this.setState({onSubmit: this.handleAdd});
-  }
+const initialState = {
+  tasks: null,
+  error: null,
+  isLoading: false,
+};
 
-  connectWebSocket = () => {
-    log('WebSocket connection');
-    this.ws.onopen = () => {
-      log('connected');
-    };
-    this.ws.onmessage = ev => {
-      log('Message: ' + ev.data);
-      const tasks = this.state.tasks.filter(
-        task => task.ID != JSON.parse(ev.data).ID,
-      );
-      tasks.push(JSON.parse(ev.data));
-      this.setState({tasks});
-    };
-    this.ws.onclose = () => {
-      log('disconnected');
-    };
-    this.ws.onerror = err => {
-      log('Server encounted an error: ' + err);
-    };
-  };
+export const Home = ({children}) => {
+  const [state, setState] = useState(initialState);
+  const {isLoading, tasks, error} = state;
+  const {token} = useContext(AuthContext);
 
-  handleAdd = task => this.postTask(task);
+  const loadFromLocal = useCallback(async () => {
+    const local = await getLocalTasks();
+    log('local tasks');
+    if (local.length > 0) {
+      setState({tasks: local, isLoading: false});
+    }
+  });
 
-  loadTasks = () => {
-    log('Loading tasks...');
-    this.setState({isLoading: true, error: null});
-    getTasks()
-      .then(response => response.json())
-      .then(response => {
-        this.setState({tasks: response, isLoading: false});
-      })
-      .catch(err => {
-        this.setState({error: err, isLoading: false});
-      });
-  };
+  const addLocal = useCallback(async task => {
+    await addLocalTask(task);
+    loadFromLocal();
+  });
 
-  postTask = task => {
+  useEffect(() => {
+    if (token && !tasks && !error && !isLoading) {
+      log('load tasks started');
+      setState({isLoading: true, error: null});
+      getTasks()
+        .then(response => {
+          removeTasks();
+          let ids = '';
+          response.forEach(task => {
+            AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
+            ids += task.ID.toString() + ' ';
+          });
+          AsyncStorage.setItem(IDS_KEY, ids);
+          setState({tasks: response, isLoading: false});
+        })
+        .catch(err => {
+          console.log('Error: ', err);
+          loadFromLocal();
+          setState({error: err[0], isLoading: false});
+        });
+    }
+  }, [token]);
+
+  const onSubmit = useCallback(async task => {
     log('Posting task...');
     return putTask(task)
-      .then(response => response.json())
+      .then(response => {
+        const tasksLocal = tasks.filter(task => task.ID != response.key);
+        tasksLocal.push(response);
+        setState({tasks: tasksLocal, isLoading: false});
+      })
       .catch(err => {
         console.log(err);
+        addLocal(task);
       });
-  };
+  });
 
-  render() {
-    log('Rendering...');
-    return <Provider value={this.state}>{this.props.children}</Provider>;
+  const value = {...state, onSubmit};
+  log('Rendering...');
+  return <Provider value={value}>{children}</Provider>;
+};
+
+const removeTasks = async () => {
+  try {
+    const ids = (await AsyncStorage.getItem(IDS_KEY)).split(' ');
+    if (ids.length > 0) {
+      ids.forEach(id => {
+        AsyncStorage.removeItem(parseInt(id));
+      });
+      AsyncStorage.removeItem(IDS_KEY);
+    }
+  } catch (err) {
+    console.log(err);
   }
-}
+};
+
+const getLocalTasks = async () => {
+  let tasksLocal = [];
+  try {
+    const ids = (await AsyncStorage.getItem(IDS_KEY)).split(' ');
+    if (ids.length > 0) {
+      for (let i = 0; i < ids.length; i++) {
+        if (ids[i]) {
+          const task = await AsyncStorage.getItem(ids[i]);
+          tasksLocal.push(JSON.parse(task));
+        }
+      }
+    }
+  } catch (err) {
+    console.log('LocalError: ', err);
+  }
+  return tasksLocal;
+};
+
+const addLocalTask = async task => {
+  try {
+    await AsyncStorage.removeItem(task.ID);
+  } catch (err) {}
+  try {
+    await AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
+  } catch (err) {}
+};
