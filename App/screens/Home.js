@@ -1,8 +1,9 @@
 import React, {useState, useEffect, useContext, useCallback} from 'react';
-import {getTasks, putTask, getLogger} from '../core';
+import {getTasks, putTask, getLogger, apiUrl, wsUrl} from '../core';
 import {Provider} from './context';
 import {AuthContext} from '../auth/context';
 import AsyncStorage from '@react-native-community/async-storage';
+import { webSocket } from 'rxjs/webSocket';
 
 const log = getLogger('Home');
 
@@ -13,6 +14,7 @@ const initialState = {
   error: null,
   isLoading: false,
 };
+const webSocket$ = webSocket(`${wsUrl}/tasks`);
 
 export const Home = ({children}) => {
   const [state, setState] = useState(initialState);
@@ -32,45 +34,52 @@ export const Home = ({children}) => {
     loadFromLocal();
   });
 
+  const refresh = () => getTasks().then(removeTasks())
+      .then(response => {
+        let ids = '';
+        response.forEach(task => {
+          AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
+          ids += task.ID.toString() + ' ';
+        });
+        AsyncStorage.setItem(IDS_KEY, ids);
+        setState({tasks: response, isLoading: false});
+      })
+      .catch(err => {
+        console.log('Error: ', err);
+        loadFromLocal();
+        setState({error: err[0], isLoading: false});
+      });
+
   useEffect(() => {
     if (token && !tasks && !error && !isLoading) {
       log('load tasks started');
       setState({isLoading: true, error: null});
-      getTasks().then(removeTasks())
-        .then(response => {
-          let ids = '';
-          response.forEach(task => {
-            AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
-            ids += task.ID.toString() + ' ';
-          });
-          AsyncStorage.setItem(IDS_KEY, ids);
-          setState({tasks: response, isLoading: false});
-        })
-        .catch(err => {
-          console.log('Error: ', err);
-          loadFromLocal();
-          setState({error: err[0], isLoading: false});
-        });
+      refresh();
     }
   }, [token]);
 
   const onSubmit = useCallback(async task => {
     log('Posting task...');
-    addLocal(task);
-    return putTask(task)
-      .then(response => {
-        const tasksLocal = tasks.filter(task => task.ID.toString() !== response.key);
-        tasksLocal.push(response);
-        setState({tasks: tasksLocal, isLoading: false});
-      })
-      .catch(err => {
-        console.log(err);
-        addLocal(task);
-      });
+    return putTask(task).catch(err => {
+      console.log(err);
+    });
   });
 
-  const value = {...state, onSubmit};
+  const onSearch = (tasks, isSearching=true) => isSearching ? setState({tasks: tasks, isLoading: false}) : refresh();
+  webSocket$.subscribe(({ event, task }) => {
+    if (event === 'created') {
+        if(!tasks) return;
+        log(JSON.stringify(task));
+        const tasksLocal = tasks.filter(t => t.ID !== task.key);
+        // delete task.lastId;
+        tasksLocal.push(task);
+        //addLocal(task);
+        setState({tasks: tasksLocal, isLoading: false});
+    }
+  }, err => console.log(err));
+  const value = {...state, onSubmit, onSearch};
   log('Rendering...');
+  log(JSON.stringify(state.tasks));
   return <Provider value={value}>{children}</Provider>;
 };
 
@@ -81,7 +90,7 @@ const removeTasks = async () => {
       ids.forEach(id => {
         AsyncStorage.removeItem(id);
       });
-      AsyncStorage.removeItem(IDS_KEY);
+      await AsyncStorage.removeItem(IDS_KEY);
     }
   } catch (err) {
     console.log(err);
