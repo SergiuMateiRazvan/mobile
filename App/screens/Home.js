@@ -65,6 +65,7 @@ export const Home = ({children}) => {
       })
       .catch(err => {
         console.log(err);
+        addLocal(task);
       });
   });
 
