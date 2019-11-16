@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext, useCallback} from 'react';
 import {getTasks, putTask, getLogger} from '../core';
 import {Provider} from './context';
 import {AuthContext} from '../auth/context';
-import {AsyncStorage} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const log = getLogger('Home');
 
@@ -36,9 +36,8 @@ export const Home = ({children}) => {
     if (token && !tasks && !error && !isLoading) {
       log('load tasks started');
       setState({isLoading: true, error: null});
-      getTasks()
+      getTasks().then(removeTasks())
         .then(response => {
-          removeTasks();
           let ids = '';
           response.forEach(task => {
             AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
@@ -57,9 +56,10 @@ export const Home = ({children}) => {
 
   const onSubmit = useCallback(async task => {
     log('Posting task...');
+    addLocal(task);
     return putTask(task)
       .then(response => {
-        const tasksLocal = tasks.filter(task => task.ID != response.key);
+        const tasksLocal = tasks.filter(task => task.ID.toString() !== response.key);
         tasksLocal.push(response);
         setState({tasks: tasksLocal, isLoading: false});
       })
@@ -79,7 +79,7 @@ const removeTasks = async () => {
     const ids = (await AsyncStorage.getItem(IDS_KEY)).split(' ');
     if (ids.length > 0) {
       ids.forEach(id => {
-        AsyncStorage.removeItem(parseInt(id));
+        AsyncStorage.removeItem(id);
       });
       AsyncStorage.removeItem(IDS_KEY);
     }
@@ -108,7 +108,7 @@ const getLocalTasks = async () => {
 
 const addLocalTask = async task => {
   try {
-    await AsyncStorage.removeItem(task.ID);
+    await AsyncStorage.removeItem(task.ID.toString());
   } catch (err) {}
   try {
     await AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));

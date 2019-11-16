@@ -1,5 +1,5 @@
 import {getLogger} from './log';
-export const apiUrl = 'http://172.30.115.166:3000';
+export const apiUrl = 'http://192.168.0.102:3000';
 
 const defaultHeaders = {
   Accept: 'application/json',
@@ -14,12 +14,14 @@ const buildHeaders = () => {
   return headers;
 };
 
+const defaultIssue = { issue: [{ error: 'Unexpected error' }]};
+
 export const getTasks = () =>
   withErrorHandling(
     fetch(`${apiUrl}/tasks`, {
       method: 'GET',
       headers: buildHeaders(),
-    }),
+    })
   );
 
 export const putTask = task =>
@@ -29,7 +31,7 @@ export const putTask = task =>
       mode: 'cors',
       headers: buildHeaders(),
       body: JSON.stringify(task),
-    }),
+    })
   );
 
 export const login = (username, password) =>
@@ -42,7 +44,7 @@ export const login = (username, password) =>
         Accept: 'application/json',
       },
       body: JSON.stringify({username, password}),
-    }),
+    })
   );
 
 let token;
