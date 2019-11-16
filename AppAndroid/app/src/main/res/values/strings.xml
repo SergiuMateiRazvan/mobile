@@ -12,4 +12,11 @@
         <item>In Progress</item>
         <item>Done</item>
     </string-array>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must not be null</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
 </resources>

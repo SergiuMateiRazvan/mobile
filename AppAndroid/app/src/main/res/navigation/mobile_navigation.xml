@@ -7,13 +7,19 @@
 
     <fragment
         android:id="@+id/task_list_fragment"
-        android:name="app.app.fragments.TaskListFragment"
+        android:name="app.app.task.tasks.TaskListFragment"
         android:label="@string/task_list"
         tools:layout="@layout/task_list_fragment" />
 
     <fragment
+        android:id="@+id/login_fragment"
+        android:name="app.app.auth.login.LoginFragment"
+        android:label="@string/login"
+        tools:layout="@layout/login_fragment" />
+
+    <fragment
         android:id="@+id/task_edit_fragment"
-        android:name="app.app.fragments.TaskEditFragment"
+        android:name="app.app.task.task.TaskEditFragment"
         android:label="@string/task_edit"
         tools:layout="@layout/task_edit_fragment" />
 </navigation>

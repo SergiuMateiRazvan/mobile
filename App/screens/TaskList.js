@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
@@ -13,61 +13,66 @@ import Task from './components/Task';
 import styles from './styles';
 import Header from './components/ListHeader';
 import Hr from 'react-native-hr-component';
-import {navService, getLogger} from '../core';
-
+import {getLogger} from '../core';
+import {AuthContext} from '../auth/context';
 const log = getLogger('TaskList');
 
-export class TaskList extends Component {
-  static navigationOptions = {
-    header: null,
-  };
-  constructor(props) {
-    super(props);
-  }
+export const TaskList = ({navigation}) => {
+  log('Rendering...');
+  const {onLogout} = useContext(AuthContext);
 
-  actionOnRow = task => {
-    log('Row pressed');
-    navService.navigate('TasksEdit', {task: task});
-  };
-  render() {
-    log('Rendering...');
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}> My Tasks</Text>
-        <Consumer>
-          {({tasks, error, isLoading}) => (
-            <View style={listStyles.listConstainer}>
-              <ActivityIndicator animating={isLoading} size="large" />
-              {error && <Text>{error || 'Loading error'}</Text>}
-              {tasks && <Header />}
-              <Hr text="+" />
-              {tasks && (
-                <FlatList
-                  data={tasks.map(item => ({
-                    ...item,
-                    key: item.ID || Math.random(),
-                  }))}
-                  renderItem={({item}) => (
-                    <TouchableOpacity onPress={() => this.actionOnRow(item)}>
-                      <Task styles={styles.listColumn} task={item} />
-                    </TouchableOpacity>
-                  )}
-                />
-              )}
-            </View>
-          )}
-        </Consumer>
-        <View style={listStyles.buttonView}>
-          <Button
-            title="Add"
-            color="rgb(255,50,10)"
-            onPress={() => navService.navigate('TasksEdit')}
-          />
-        </View>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}> My Tasks</Text>
+      <Consumer>
+        {({tasks, error, isLoading}) => (
+          <View style={listStyles.listConstainer}>
+            <ActivityIndicator animating={isLoading} size="large" />
+            {error && <Text>{error || 'Loading error'}</Text>}
+            {tasks && <Header />}
+            <Hr text="+" />
+            {tasks && (
+              <FlatList
+                data={tasks.map(item => ({
+                  ...item,
+                  key: item.ID || Math.random(),
+                }))}
+                renderItem={({item}) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      log('Row pressed');
+                      navigation.navigate('TaskEdit', {task: item});
+                    }}>
+                    <Task styles={styles.listColumn} task={item} />
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+          </View>
+        )}
+      </Consumer>
+      <View style={listStyles.logoutView}>
+        <Button
+          onPress={() => {
+            onLogout().then(() => navigation.navigate('Auth'));
+          }}
+          title="Logout"
+        />
       </View>
-    );
-  }
-}
+      <View style={listStyles.buttonView}>
+        <Button
+          title="Add"
+          color="rgb(255,50,10)"
+          onPress={() => navigation.navigate('TaskEdit')}
+        />
+      </View>
+    </View>
+  );
+};
+
+TaskList.navigationOptions = () => ({
+  header: null,
+});
 
 const listStyles = StyleSheet.create({
   listConstainer: {
@@ -80,6 +85,14 @@ const listStyles = StyleSheet.create({
     position: 'absolute',
     bottom: '5%',
     right: '3%',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+  },
+  logoutView: {
+    position: 'absolute',
+    bottom: '5%',
+    left: '3%',
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
