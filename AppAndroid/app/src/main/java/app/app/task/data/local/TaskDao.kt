@@ -3,9 +3,10 @@ package app.app.task.data.local
 import androidx.lifecycle.LiveData
 import app.app.task.data.Task
 import androidx.room.*
+import java.io.Serializable
 
 @Dao
-interface TaskDao {
+interface TaskDao : Serializable{
     @Query("SELECT * from tasks ORDER BY Title ASC")
     fun getAll(): LiveData<List<Task>>
 
@@ -20,4 +21,7 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks")
     suspend fun deleteAll()
+
+    @Query("DELETE FROM tasks WHERE Title=:title")
+    suspend fun deleteByTitle(title: String)
 }

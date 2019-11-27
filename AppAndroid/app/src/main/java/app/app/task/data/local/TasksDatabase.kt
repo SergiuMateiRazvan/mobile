@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Task::class], version = 1)
+@Database(entities = [Task::class], version = 2)
 abstract class TasksDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
@@ -30,6 +30,7 @@ abstract class TasksDatabase : RoomDatabase() {
                     TasksDatabase::class.java,
                     "tasks"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(WordDatabaseCallback(scope))
                     .build()
             INSTANCE = instance

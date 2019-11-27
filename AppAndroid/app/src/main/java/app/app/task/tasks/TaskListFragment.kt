@@ -5,18 +5,12 @@ import androidx.fragment.app.Fragment
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import app.app.task.data.Task
 import app.app.R
 import app.app.auth.data.AuthRepository
 import app.app.auth.data.local.TokenDatabase
-import app.app.core.Api
 import kotlinx.android.synthetic.main.task_list_fragment.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.supervisorScope
 
 
 class TaskListFragment : Fragment() {
@@ -24,7 +18,6 @@ class TaskListFragment : Fragment() {
     private lateinit var taskListModel: TaskListViewModel
 
     private lateinit var authRepository: AuthRepository
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
