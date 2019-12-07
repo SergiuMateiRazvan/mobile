@@ -1,6 +1,6 @@
-import {getLogger} from './log';
-export const apiUrl = 'http://192.168.0.102:3000';
 
+export const apiUrl = 'http://192.168.0.103:3000';
+export const wsUrl = 'ws://192.168.0.103:3000';
 const defaultHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
@@ -47,11 +47,13 @@ export const login = (username, password) =>
     })
   );
 
-let token;
+let token='';
 
 export const setToken = value => {
   token = value;
 };
+export const getToken = () => token;
+
 
 const withErrorHandling = fetchPromise =>
   fetchPromise

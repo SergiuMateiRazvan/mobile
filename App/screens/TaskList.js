@@ -15,6 +15,7 @@ import Header from './components/ListHeader';
 import Hr from 'react-native-hr-component';
 import {getLogger} from '../core';
 import {AuthContext} from '../auth/context';
+import Search from './components/Search';
 const log = getLogger('TaskList');
 
 export const TaskList = ({navigation}) => {
@@ -25,9 +26,10 @@ export const TaskList = ({navigation}) => {
     <View style={styles.container}>
       <Text style={styles.title}> My Tasks</Text>
       <Consumer>
-        {({tasks, error, isLoading}) => (
-          <View style={listStyles.listConstainer}>
-            <ActivityIndicator animating={isLoading} size="large" />
+        {({tasks, error, isLoading, onSearch}) => (
+          <View style={listStyles.listContainer}>
+            <Search onChangeState={onSearch} />
+            <ActivityIndicator animating={isLoading} size="large" style={{display: 'none'}} />
             {error && <Text>{error || 'Loading error'}</Text>}
             {tasks && <Header />}
             <Hr text="+" />
@@ -35,7 +37,7 @@ export const TaskList = ({navigation}) => {
               <FlatList
                 data={tasks.map(item => ({
                   ...item,
-                  key: item.ID || Math.random(),
+                  key: item.ID.toString() || Math.random().toString(),
                 }))}
                 renderItem={({item}) => (
                   <TouchableOpacity
@@ -75,7 +77,7 @@ TaskList.navigationOptions = () => ({
 });
 
 const listStyles = StyleSheet.create({
-  listConstainer: {
+  listContainer: {
     flex: 1,
     alignItems: 'stretch',
     width: '100%',

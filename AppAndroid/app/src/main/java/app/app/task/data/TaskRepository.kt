@@ -1,22 +1,31 @@
 package app.app.task.data
 
 import androidx.lifecycle.LiveData
+import androidx.work.*
 import app.app.task.data.remote.TaskApi
 import app.app.core.*
 import app.app.task.data.local.TaskDao
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import kotlin.coroutines.coroutineContext
+
 
 class TaskRepository(private val taskDao: TaskDao) {
 
     val tasks = taskDao.getAll()
+    private val request = Request.Builder().url("ws://${Api.IP_ADDRESS}/tasks").build()
+
+    var webSocket = OkHttpClient().newWebSocket(request, WebSocket(taskDao))
 
     suspend fun refresh(): Result<Boolean> {
         try {
             val tasks = TaskApi.service.find()
             for (task in tasks) {
+                task.Synched = true
                 taskDao.insert(task)
             }
             return Result.Success(true)
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             return Result.Error(e)
         }
     }
@@ -28,20 +37,23 @@ class TaskRepository(private val taskDao: TaskDao) {
 
     suspend fun save(task: Task): Result<Task> {
         try {
-            val createdTask = TaskApi.service.create(task)
-            taskDao.insert(createdTask)
-            return Result.Success(createdTask)
-        } catch(e: Exception) {
+
+            if(taskDao.getById(task.ID).value!=null){
+                return this.update(task)
+            }else {
+                taskDao.insert(task)
+                return Result.Success(task)
+            }
+        } catch (e: Exception) {
             return Result.Error(e)
         }
     }
 
     suspend fun update(task: Task): Result<Task> {
         try {
-            val updatedTask = TaskApi.service.create(task)
-            taskDao.update(updatedTask)
-            return Result.Success(updatedTask)
-        } catch(e: Exception) {
+            taskDao.update(task)
+            return Result.Success(task)
+        } catch (e: Exception) {
             return Result.Error(e)
         }
     }
