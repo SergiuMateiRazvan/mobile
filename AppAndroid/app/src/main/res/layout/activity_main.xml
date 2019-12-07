@@ -2,9 +2,11 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <!--    android:background="@drawable/ic_image_black_24dp"-->
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -20,6 +22,25 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:rotation="270"
+        android:scaleY="1.8"
+        android:scaleX="1.8"/>
+
     <include layout="@layout/content_main" />
+
+    <Button
+        android:id="@+id/capture_btn"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/button_width"
+        android:layout_marginLeft="@dimen/button_width"
+        android:text="Change background" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
