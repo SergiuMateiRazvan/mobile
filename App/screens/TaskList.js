@@ -61,6 +61,13 @@ export const TaskList = ({navigation}) => {
           title="Logout"
         />
       </View>
+      <View style={listStyles.changeBackgroundView}>
+        <Button
+            title="Change Background"
+            color="rgb(255,50,10)"
+            onPress={() => navigation.navigate('Camera')}
+        />
+      </View>
       <View style={listStyles.buttonView}>
         <Button
           title="Add"
@@ -99,4 +106,11 @@ const listStyles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
   },
+  changeBackgroundView: {
+    position: 'absolute',
+    bottom: '5%',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+  }
 });

@@ -6,21 +6,23 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {webSocket} from 'rxjs/webSocket';
 import {useNetInfo} from '@react-native-community/netinfo';
 import BackgroundJob from "react-native-background-job";
-
-const putKey = "addUnsynched";
-BackgroundJob.register({
-    jobKey: putKey,
-    job: () => {
-        const info = useNetInfo();
-        log("Executing Job");
-        if (info.isConnected) {
-            var tasks = getLocalTasks().filter(t => t.synched === 0);
-            tasks.forEach(t => {
-                putTask(t).catch(err => console.log(err));
-            });
-        }
-    }
-});
+import {RNCamera} from 'react-native-camera';
+import { ImageBackground, Text, TouchableOpacity, View} from "react-native";
+import CameraRoll from "@react-native-community/cameraroll";
+// const putKey = "addUnsynched";
+// BackgroundJob.register({
+//     jobKey: putKey,
+//     job: () => {
+//         const info = useNetInfo();
+//         log("Executing Job");
+//         if (info.isConnected) {
+//             var tasks = getLocalTasks().filter(t => t.synched === 0);
+//             tasks.forEach(t => {
+//                 putTask(t).catch(err => console.log(err));
+//             });
+//         }
+//     }
+// });
 
 const log = getLogger('Home');
 
@@ -38,7 +40,7 @@ export const Home = ({children}) => {
     const {isLoading, tasks, error} = state;
     const {token} = useContext(AuthContext);
     const info = useNetInfo();
-
+    const [image_uri, setImage_uri] = useState('');
     const loadFromLocal = useCallback(async () => {
         const local = await getLocalTasks();
         log('local tasks');
@@ -49,14 +51,13 @@ export const Home = ({children}) => {
 
     const addLocal = useCallback(async task => {
         await addLocalTask(task);
-        // loadFromLocal();
+        loadFromLocal();
     });
 
     const refresh = () => getTasks().then(removeTasks())
         .then(response => {
             let ids = '';
             response.forEach(task => {
-                task.synched = 1;
                 AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
                 ids += task.ID.toString() + ' ';
             });
@@ -79,7 +80,6 @@ export const Home = ({children}) => {
 
     const onSubmit = useCallback(async task => {
         log('Posting task...');
-        task.synched = 0;
         await addLocalTask(task);
         if (info.isConnected) {
             return putTask(task).catch(err => {
@@ -98,7 +98,6 @@ export const Home = ({children}) => {
         if (event === 'created') {
             if (!tasks) return;
             log(JSON.stringify(task));
-            task.synched = 1;
             const tasksLocal = tasks.filter(t => t.ID != task.key);
             tasksLocal.push(task);
             log('task received', JSON.stringify(task));
@@ -106,17 +105,29 @@ export const Home = ({children}) => {
             setState({tasks: tasksLocal, isLoading: false});
         }
     }, err => console.log(err));
-    const value = {...state, onSubmit, onSearch};
-    BackgroundJob.schedule({
-        jobKey: putKey,
-        notificationText: "Job executed",
-        notificationTitle: "Background Job",
-        period: 1000,
-        allowWhileIdle: true,
-        allowExecutionInForeground: true
-    });
+    const takePicture = async (camera) => {
+        const options = {quality: 0.5, base64: true};
+        const data = await camera.takePictureAsync(options);
+        CameraRoll.save(data.uri);
+        return setImage_uri(data.uri);
+    };
+    const value = {...state, onSubmit, onSearch, takePicture};
+    // BackgroundJob.schedule({
+    //     jobKey: putKey,
+    //     notificationText: "Job executed",
+    //     notificationTitle: "Background Job",
+    //     period: 1000,
+    //     allowWhileIdle: true,
+    //     allowExecutionInForeground: true
+    // });
+
     log('Rendering...');
-    return <Provider value={value}>{children}</Provider>;
+    return (<ImageBackground
+        source={{uri: image_uri}}
+        style={{width: "100%", height: "100%", resizeMode: 'cover', flex: 2, opacity: 0.5}}
+    >
+            <Provider value={value}>{children}</Provider>
+    </ImageBackground>);
 };
 
 const removeTasks = async () => {
@@ -156,7 +167,8 @@ const addLocalTask = async task => {
     try {
         await AsyncStorage.removeItem(task.ID.toString());
         // await AsyncStorage.removeItem(task.key.toString());
-    } catch (err) {}
+    } catch (err) {
+    }
     try {
         await AsyncStorage.setItem(task.ID.toString(), JSON.stringify(task));
     } catch (err) {

@@ -4,7 +4,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: 'rgba(200,200,200,0.5)',
+    // backgroundColor: 'rgba(200,200,200,0.5)',
+    // backgroundColor: 'transparent',
     // borderWidth: 2,
     // borderColor: 'red',
   },
