@@ -1,6 +1,6 @@
 
-export const apiUrl = 'http://192.168.0.103:3000';
-export const wsUrl = 'ws://192.168.0.103:3000';
+export const apiUrl = 'http://192.168.0.101:3000';
+export const wsUrl = 'ws://192.168.0.101:3000';
 const defaultHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
